@@ -9679,7 +9679,7 @@ int CTFPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 		}
 
 		// Set our disguise health when taking falldamage to make it more believable
-		if ( m_Shared.InCond( TF_COND_DISGUISED ) && info.GetDamageType() == DMG_FALL)
+		if ( m_Shared.InCond( TF_COND_DISGUISED ) && info.GetDamageType() & DMG_FALL)
 		{
 			m_Shared.SetDisguiseHealth( Max( m_Shared.GetDisguiseHealth() - RoundFloatToInt( info.GetDamage() ), 1 ) );
 		}
