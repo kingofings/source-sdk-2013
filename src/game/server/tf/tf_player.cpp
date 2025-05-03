@@ -9677,6 +9677,12 @@ int CTFPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 		{
 			m_Shared.NoteLastDamageTime( m_lastDamageAmount );
 		}
+
+		// Set our disguise health when taking falldamage to make it more believable
+		if ( m_Shared.InCond( TF_COND_DISGUISED ) && info.GetDamageType() == DMG_FALL)
+		{
+			m_Shared.SetDisguiseHealth( Max( m_Shared.GetDisguiseHealth() - RoundFloatToInt( info.GetDamage() ), 1 ) );
+		}
 	}
 
 	if ( pWeapon ) 
@@ -15162,8 +15168,6 @@ void CTFPlayer::PainSound( const CTakeDamageInfo &info )
 					disguisedFilter.AddRecipient( this );
 					EmitSound( disguisedFilter, entindex(), pDisguiseData->GetDeathSound( DEATH_SOUND_GENERIC ) );
 				}
-
-				m_Shared.SetDisguiseHealth( Max( m_Shared.GetDisguiseHealth() - RoundFloatToInt( info.GetDamage() ), 1 ) );
 			}
 		}
 		return;
