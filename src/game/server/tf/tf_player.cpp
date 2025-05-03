@@ -15139,7 +15139,7 @@ void CTFPlayer::PainSound( const CTakeDamageInfo &info )
 		// don't play sound for fall stomp event
 		if ( !( pGround && pGround->IsPlayer() && m_Shared.CanFallStomp() ) )
 		{
-			TFPlayerClassData_t* pData = GetPlayerClass()->GetData();
+			TFPlayerClassData_t *pData = GetPlayerClass()->GetData();
 			if ( pData )
 			{
 				CPASFilter filter( GetAbsOrigin() );
@@ -15154,7 +15154,7 @@ void CTFPlayer::PainSound( const CTakeDamageInfo &info )
 
 			if ( m_Shared.InCond( TF_COND_DISGUISED ) )
 			{
-				TFPlayerClassData_t* pDisguiseData = GetPlayerClassData( m_Shared.GetDisguiseClass() );
+				TFPlayerClassData_t *pDisguiseData = GetPlayerClassData( m_Shared.GetDisguiseClass() );
 				if ( pDisguiseData )
 				{
 					CPASFilter disguisedFilter( GetAbsOrigin() );
