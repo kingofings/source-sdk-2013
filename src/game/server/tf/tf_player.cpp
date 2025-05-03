@@ -15065,8 +15065,8 @@ void CTFPlayer::PlayFlinch( const CTakeDamageInfo &info )
 	if ( !IsAlive() )
 		return;
 
-	// No pain flinches while disguised, our man has supreme discipline
-	if ( m_Shared.InCond( TF_COND_DISGUISED ) )
+	// No pain flinches while disguised, our man has supreme discipline unless he falls
+	if ( m_Shared.InCond( TF_COND_DISGUISED ) && !( info.GetDamageType() & DMG_FALL ) )
 		return;
 
 	PlayerAnimEvent_t flinchEvent;
@@ -15128,10 +15128,6 @@ void CTFPlayer::PainSound( const CTakeDamageInfo &info )
 	if ( !IsAlive() )
 		return;
 
-	// no pain sounds while disguised, our man has supreme discipline
-	if ( m_Shared.InCond( TF_COND_DISGUISED ) )
-		return;
-
 	if ( m_flNextPainSoundTime > gpGlobals->curtime )
 		return;
 
@@ -15143,14 +15139,39 @@ void CTFPlayer::PainSound( const CTakeDamageInfo &info )
 		// don't play sound for fall stomp event
 		if ( !( pGround && pGround->IsPlayer() && m_Shared.CanFallStomp() ) )
 		{
-			TFPlayerClassData_t *pData = GetPlayerClass()->GetData();
+			TFPlayerClassData_t* pData = GetPlayerClass()->GetData();
 			if ( pData )
 			{
-				EmitSound( pData->GetDeathSound( DEATH_SOUND_GENERIC ) );
+				CPASFilter filter( GetAbsOrigin() );
+				if ( m_Shared.InCond( TF_COND_DISGUISED ) )
+				{
+					filter.RemoveRecipientsByTeam( GetGlobalTFTeam( ( GetTeamNumber() == TF_TEAM_RED ) ? TF_TEAM_BLUE : TF_TEAM_RED ) );
+					filter.RemoveRecipient( this );
+				}
+
+				EmitSound( filter, entindex(), pData->GetDeathSound( DEATH_SOUND_GENERIC ) );
+			}
+
+			if ( m_Shared.InCond( TF_COND_DISGUISED ) )
+			{
+				TFPlayerClassData_t* pDisguiseData = GetPlayerClassData( m_Shared.GetDisguiseClass() );
+				if ( pDisguiseData )
+				{
+					CPASFilter disguisedFilter( GetAbsOrigin() );
+					disguisedFilter.RemoveRecipientsByTeam( GetGlobalTFTeam( GetTeamNumber() ) );
+					disguisedFilter.AddRecipient( this );
+					EmitSound( disguisedFilter, entindex(), pDisguiseData->GetDeathSound( DEATH_SOUND_GENERIC ) );
+				}
+
+				m_Shared.SetDisguiseHealth( Max( m_Shared.GetDisguiseHealth() - RoundFloatToInt( info.GetDamage() ), 1 ) );
 			}
 		}
 		return;
 	}
+
+	// no pain sounds while disguised, our man has supreme discipline
+	if ( m_Shared.InCond( TF_COND_DISGUISED ) )
+		return;
 
 	// No sound for DMG_GENERIC
 	if ( info.GetDamageType() == 0 || info.GetDamageType() == DMG_PREVENT_PHYSICS_FORCE )
