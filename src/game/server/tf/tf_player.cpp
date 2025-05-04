@@ -15164,6 +15164,8 @@ void CTFPlayer::PainSound( const CTakeDamageInfo &info )
 				if ( pDisguiseData )
 				{
 					CPASFilter disguisedFilter( GetAbsOrigin() );
+					disguisedFilter.RemoveRecipientsByTeam( GetGlobalTeam( TEAM_SPECTATOR ) );
+					disguisedFilter.RemoveRecipientsByTeam( GetGlobalTeam( TEAM_UNASSIGNED ) );
 					disguisedFilter.RemoveRecipientsByTeam( GetGlobalTFTeam( GetTeamNumber() ) );
 					disguisedFilter.AddRecipient( this );
 					EmitSound( disguisedFilter, entindex(), pDisguiseData->GetDeathSound( DEATH_SOUND_GENERIC ) );
