@@ -236,6 +236,8 @@ ConVar tf_halloween_giant_health_scale( "tf_halloween_giant_health_scale", "10",
 ConVar tf_grapplinghook_los_force_detach_time( "tf_grapplinghook_los_force_detach_time", "1", FCVAR_CHEAT );
 ConVar tf_powerup_max_charge_time( "tf_powerup_max_charge_time", "30", FCVAR_CHEAT );
 
+ConVar tf_disguise_mimic_fall_damage( "tf_disguise_mimic_fall_damage", "1", FCVAR_NOTIFY, "Should disguised spies mimic flinching and pain sounds when taking fall damage?", true, 0, true, 1 );
+
 extern ConVar tf_powerup_mode;
 extern ConVar tf_mvm_buybacks_method;
 extern ConVar tf_mvm_buybacks_per_wave;
@@ -9679,7 +9681,7 @@ int CTFPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 		}
 
 		// Set our disguise health when taking falldamage to make it more believable
-		if ( m_Shared.InCond( TF_COND_DISGUISED ) && info.GetDamageType() & DMG_FALL)
+		if ( tf_disguise_mimic_fall_damage.GetBool() && m_Shared.InCond( TF_COND_DISGUISED ) && info.GetDamageType() & DMG_FALL )
 		{
 			m_Shared.SetDisguiseHealth( Max( m_Shared.GetDisguiseHealth() - RoundFloatToInt( info.GetDamage() ), 1 ) );
 		}
@@ -15071,8 +15073,8 @@ void CTFPlayer::PlayFlinch( const CTakeDamageInfo &info )
 	if ( !IsAlive() )
 		return;
 
-	// No pain flinches while disguised, our man has supreme discipline unless he falls
-	if ( m_Shared.InCond( TF_COND_DISGUISED ) && !( info.GetDamageType() & DMG_FALL ) )
+	// No pain flinches while disguised, our man has supreme discipline unless he falls and is told to
+	if ( m_Shared.InCond( TF_COND_DISGUISED ) && !( tf_disguise_mimic_fall_damage.GetBool() && info.GetDamageType() & DMG_FALL ) )
 		return;
 
 	PlayerAnimEvent_t flinchEvent;
@@ -15132,6 +15134,10 @@ void CTFPlayer::PainSound( const CTakeDamageInfo &info )
 {
 	// Don't make sounds if we just died. DeathSound will handle that.
 	if ( !IsAlive() )
+		return;
+
+	// no pain sounds while disguised, our man has supreme discipline
+	if ( m_Shared.InCond( TF_COND_DISGUISED ) && !tf_disguise_mimic_fall_damage.GetBool())
 		return;
 
 	if ( m_flNextPainSoundTime > gpGlobals->curtime )
