@@ -15136,15 +15136,12 @@ void CTFPlayer::PainSound( const CTakeDamageInfo &info )
 	if ( !IsAlive() )
 		return;
 
-	// no pain sounds while disguised, our man has supreme discipline
-	if ( m_Shared.InCond( TF_COND_DISGUISED ) && !tf_disguise_mimic_fall_damage.GetBool())
-		return;
-
 	if ( m_flNextPainSoundTime > gpGlobals->curtime )
 		return;
 
 	// play death sound as if we're taking huge damage when we landed on the ground
-	if ( info.GetDamageType() & DMG_FALL )
+	// fall damage and digsuise fall damage enabled OR not disguised
+	if ( info.GetDamageType() & DMG_FALL && ( !m_Shared.InCond( TF_COND_DISGUISED ) || tf_disguise_mimic_fall_damage.GetBool() ) )
 	{
 		CBaseEntity *pGround = GetGroundEntity();
 
